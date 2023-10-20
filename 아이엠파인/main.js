@@ -3,7 +3,7 @@
 let tempTableValues; // 임시 테이블 값 저장 변수
 let idInputValue; // 값 추가 id
 let valueInputValue; // 값 추가 value
-let advancedText = ``; // 고급 편집 텍스트
+let advancedText = `[]`; // 고급 편집 텍스트
 
 /**
  * 실제 값 관련 클로져
@@ -60,7 +60,9 @@ const values = (function () {
 /**
  * 모든 DOM 로드 후 실행할 로직
  */
-document.addEventListener("DOMContentLoaded", function () {});
+document.addEventListener("DOMContentLoaded", function () {
+  document.getElementById("textarea").value = advancedText;
+});
 
 /**
  * img, video 로드 후 실행할 로직
@@ -136,11 +138,22 @@ function handleAddValue() {
 }
 
 /**
- * 값 고급 편집 textarea 콜백 함수
+ * 값 고급 편집 textarea oninput 콜백 함수
  * @param {HTMLElement} el
  */
 function handleOnInputTextarea(el) {
   advancedText = el.value;
+}
+
+/**
+ * 값 고급 편집 textarea onblur 콜백 함수
+ * @param {HTMLElement} el
+ */
+function handleOnBlurTextarea(el) {
+  if (el.value === "") {
+    advancedText = `[]`;
+    el.value = `[]`;
+  }
 }
 
 /**
