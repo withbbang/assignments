@@ -1,91 +1,97 @@
 "use strict";
 
+/******************************************************************************
+ *                                   변수 선언                                  *
+ *****************************************************************************/
 let tempTableValues; // 임시 테이블 값 저장 변수
 let idInputValue; // 값 추가 id
 let valueInputValue; // 값 추가 value
 let advancedText = `[]`; // 고급 편집 텍스트
 
 /**
- * 실제 값 관련 클로져
+ * 실제 값 관련 클로저
  */
 const values = (function () {
   let values = [];
 
-  return {
-    // values 배열 반환
-    get: function () {
-      return values;
-    },
-    // values 배열 할당
-    set: function (array) {
-      if (Array.isArray(array)) values = [...array];
-      else alert("올바른 값을 입력하시오.");
-
-      return values;
-    },
-    // values 배열 추가
-    add: function ({ id, value }) {
-      if (
-        handleValidCheckWithoutZero(id) &&
-        handleValidCheckWithoutZero(value) &&
-        !handleIdValidCheck(id)
-      ) {
-        values.push({ id, value });
-        tempTableValues = [...values];
+  return function () {
+    return {
+      // values 배열 반환
+      get: function () {
         return values;
-      } else {
-        alert("올바른 값을 입력하시오.");
-      }
-    },
-    // values 배열 임시 삭제
-    delete: function (id) {
-      if (handleValidCheckWithoutZero(id) && handleIdValidCheck(id)) {
-        const idx = tempTableValues.findIndex((value) => value.id === id);
-        if (idx > -1) tempTableValues.splice(idx, 1);
-      } else {
-        alert("올바른 값을 입력하시오.");
-      }
-    },
+      },
+      // values 배열 할당
+      set: function (array) {
+        if (Array.isArray(array)) values = [...array];
+        else alert("올바른 값을 입력하시오.");
+
+        return values;
+      },
+      // values 배열 추가
+      add: function ({ id, value }) {
+        if (
+          handleValidCheckWithoutZero(id) &&
+          handleValidCheckWithoutZero(value) &&
+          !handleIdValidCheck(id)
+        ) {
+          values.push({ id, value });
+          tempTableValues = [...values];
+          return values;
+        } else {
+          alert("올바른 값을 입력하시오.");
+        }
+      },
+      // values 배열 임시 삭제
+      delete: function (id) {
+        if (handleValidCheckWithoutZero(id) && handleIdValidCheck(id)) {
+          const idx = tempTableValues.findIndex((value) => value.id === id);
+          if (idx > -1) tempTableValues.splice(idx, 1);
+        } else {
+          alert("올바른 값을 입력하시오.");
+        }
+      },
+    };
   };
 })();
 
-/**
- * 모든 DOM 로드 후 실행할 로직
- */
+/******************************************************************************
+ *                                화면 초기 실행                                 *
+ *****************************************************************************/
+// 모든 DOM 로드 후 실행할 로직
 document.addEventListener("DOMContentLoaded", function () {
   document.getElementById("textarea").value = advancedText;
   handleSetCanvas();
 });
-
-/**
- * img, video 로드 후 실행할 로직
- */
+// img, video 로드 후 실행할 로직
 window.onload = function () {};
 
 /**
- * 값 편집 삭제 버튼 콜백 함수
+ * 값 편집 - 삭제 버튼 콜백 함수
  * @param {HTMLElement} el
  */
 function handleDeleteValue(el) {
   const id = el.dataset.id;
 
-  values.delete(id);
+  values().delete(id);
 
   const ul = document.getElementById("ul");
 
   handleSetUl(ul, tempTableValues);
 }
 
+/******************************************************************************
+ *                                  콜백 함수                                   *
+ *****************************************************************************/
 /**
- * 값 편집 Apply 버튼 콜백 함수
+ * 값 편집 - Apply 버튼 콜백 함수
  */
 function handleApplyDeleteValue() {
-  values.set(tempTableValues);
+  values().set(tempTableValues);
   handleRender();
 }
 
 /**
- * 값 편집 input 콜백 함수
+ * 값 추가 - id input 콜백 함수
  * @param {HTMLElement} el
  */
 function handleOnInputId(el) {
@@ -93,7 +99,7 @@ function handleOnInputId(el) {
 }
 
 /**
- * 값 편집 input 콜백 함수
+ * 값 추가 - value input 콜백 함수
  * @param {HTMLElement} el
  */
 function handleOnInputValue(el) {
@@ -101,7 +107,7 @@ function handleOnInputValue(el) {
 }
 
 /**
- * 값 편집 Add 버튼 콜백 함수
+ * 값 추가 - Add 버튼 콜백 함수
  */
 function handleAddValue() {
   if (
@@ -109,7 +115,7 @@ function handleAddValue() {
     handleValidCheckWithoutZero(valueInputValue) &&
     !handleIdValidCheck(idInputValue)
   ) {
-    values.add({ id: idInputValue, value: valueInputValue });
+    values().add({ id: idInputValue, value: valueInputValue });
     handleRender();
   } else {
     alert("올바른 값을 입력하시오.");
@@ -117,7 +123,7 @@ function handleAddValue() {
 }
 
 /**
- * 값 고급 편집 textarea oninput 콜백 함수
+ * 값 고급 편집 - textarea oninput 콜백 함수
  * @param {HTMLElement} el
  */
 function handleOnInputTextarea(el) {
@@ -125,7 +131,7 @@ function handleOnInputTextarea(el) {
 }
 
 /**
- * 값 고급 편집 textarea onblur 콜백 함수
+ * 값 고급 편집 - textarea onblur 콜백 함수
  * @param {HTMLElement} el
  */
 function handleOnBlurTextarea(el) {
@@ -136,12 +142,12 @@ function handleOnBlurTextarea(el) {
 }
 
 /**
- * 값 고급 편집 Apply 버튼 콜백 함수
+ * 값 고급 편집 - Apply 버튼 콜백 함수
  */
 function handleApplyAdvancedValue() {
   try {
     const newValues = JSON.parse(advancedText);
-    values.set([...newValues]);
+    values().set([...newValues]);
     handleRender();
   } catch (err) {
     console.error(err);
@@ -149,18 +155,20 @@ function handleApplyAdvancedValue() {
   }
 }
 
+/******************************************************************************
+ *                                    렌더링                                    *
+ *****************************************************************************/
 /**
- * 그래프 재렌더링
+ * 그래프 - 재렌더링
  */
 function handleSetCanvas() {
   const canvas = document.querySelector(".canvas");
   const ctx = canvas.getContext("2d");
-  const { width, height, top, bottom, left, right } =
-    canvas.getBoundingClientRect();
+  const { width, height } = canvas.getBoundingClientRect();
   canvas.width = width;
   canvas.height = height;
   ctx.clearRect(0, 0, width, height);
-  const vals = values.get();
+  const vals = values().get();
   const max = handleGetMaxValueInArray();
   const paddingDefault = 20;
   const distance = (width - paddingDefault * 2) / (vals.length + 1);
@@ -182,13 +190,16 @@ function handleSetCanvas() {
   ctx.lineTo(paddingDefault, paddingDefault);
   ctx.stroke();
 
+  // 원점 표시
+  ctx.fillText(0, 0, height - 10);
+
   // 최대값 표시
   ctx.fillText(max, 0, paddingDefault);
 
   // 막대 그래프 그리기
   ctx.strokeStyle = "#f00";
   vals.forEach(({ id, value }, idx) => {
-    ctx.fillText(id, paddingDefault + distance * (idx + 1), height);
+    ctx.fillText(id, paddingDefault + distance * (idx + 1), height - 10);
     ctx.beginPath();
     ctx.moveTo(paddingDefault + distance * (idx + 1), height - paddingDefault);
     ctx.lineTo(
@@ -200,10 +211,10 @@ function handleSetCanvas() {
 }
 
 /**
- * 값 편집 재렌더링
+ * 값 편집 - 재렌더링
  */
 function handleSetTable() {
-  const vals = values.get();
+  const vals = values().get();
   tempTableValues = [...vals];
   const ul = document.getElementById("ul");
 
@@ -211,7 +222,7 @@ function handleSetTable() {
 }
 
 /**
- * 값 추가 재렌더링
+ * 값 추가 - 재렌더링
  */
 function handleSetAddInput() {
   const idInput = document.getElementById("idInput");
@@ -225,12 +236,12 @@ function handleSetAddInput() {
 }
 
 /**
- * 값 고급 편집 재렌더링
+ * 값 고급 편집 - 재렌더링
  */
 function handleSetAdvancedTextarea() {
   const textarea = document.getElementById("textarea");
 
-  textarea.value = JSON.stringify(values.get());
+  textarea.value = JSON.stringify(values().get());
 }
 
 /**
@@ -243,6 +254,9 @@ function handleRender() {
   handleSetAdvancedTextarea();
 }
 
+/******************************************************************************
+ *                                   부속함수                                   *
+ *****************************************************************************/
 /**
  * 변수 유효성 검증 함수
  * @param {string | undefined | null} value
@@ -263,7 +277,11 @@ function handleValidCheckWithoutZero(value) {
  * @returns {boolean}
  */
 function handleIdValidCheck(id) {
-  return typeof values.get().find((value) => value.id === id) === "object";
+  return (
+    typeof values()
+      .get()
+      .find((value) => value.id === id) === "object"
+  );
 }
 
 /**
@@ -304,7 +322,7 @@ function handleSetUl(ul, values) {
  */
 function handleGetMaxValueInArray() {
   try {
-    const vals = values.get();
+    const vals = values().get();
 
     if (!Array.isArray(vals)) throw Error("배열이 아닙니다.");
 
