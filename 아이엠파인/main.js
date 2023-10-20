@@ -46,14 +46,6 @@ const values = (function () {
         alert("올바른 값을 입력하시오.");
       }
     },
-    // values 배열 삭제 적용
-    applyDelete: function () {
-      values = [...tempTableValues];
-    },
-    // values 배열 고급 편집 적용
-    applyAdvanced: function () {
-      values = [...JSON.parse(advancedText)];
-    },
   };
 })();
 
@@ -62,6 +54,7 @@ const values = (function () {
  */
 document.addEventListener("DOMContentLoaded", function () {
   document.getElementById("textarea").value = advancedText;
+  handleSetCanvas();
 });
 
 /**
@@ -122,7 +115,7 @@ function handleOnInputValue(el) {
 }
 
 /**
- * 값 추가 Add 버튼 콜백 함수
+ * 값 편집 Add 버튼 콜백 함수
  */
 function handleAddValue() {
   if (
@@ -170,8 +163,59 @@ function handleApplyAdvancedValue() {
   }
 }
 
-function handleSetCanvas() {}
+/**
+ * 그래프 재렌더링
+ */
+function handleSetCanvas() {
+  const canvas = document.querySelector(".canvas");
+  const ctx = canvas.getContext("2d");
+  const { width, height, top, bottom, left, right } =
+    canvas.getBoundingClientRect();
+  canvas.width = width;
+  canvas.height = height;
+  ctx.clearRect(0, 0, width, height);
+  const vals = values.get();
+  const length = vals.length;
+  const max = handleGetMaxValueInArray();
+  const paddingDefault = 20;
+  const distance = ((width - paddingDefault * 2) * length) / (length + 1);
 
+  // 그래프 기본 스타일 설정
+  ctx.lineWidth = 1;
+  ctx.strokeStyle = "#000";
+  ctx.font = "15px";
+
+  // X축 그리기
+  ctx.beginPath();
+  ctx.moveTo(paddingDefault, height - paddingDefault);
+  ctx.lineTo(width - paddingDefault, height - paddingDefault);
+  ctx.stroke();
+  ctx.closePath();
+  // Y축 그리기
+  ctx.beginPath();
+  ctx.moveTo(paddingDefault, height - paddingDefault);
+  ctx.lineTo(paddingDefault, paddingDefault);
+  ctx.stroke();
+  ctx.closePath();
+
+  // 최대값 설정
+  ctx.fillText(max, 0, paddingDefault);
+
+  // 막대 그래프 그리기
+  ctx.strokeStyle = "#00f";
+  vals.forEach(({ id, value }, idx) => {
+    ctx.fillText(id, paddingDefault + distance * (idx + 1), height);
+    ctx.beginPath();
+    ctx.moveTo(paddingDefault + distance * (idx + 1), height - paddingDefault);
+    ctx.lineTo(paddingDefault + distance * (idx + 1), paddingDefault);
+    ctx.stroke();
+    ctx.closePath();
+  });
+}
+
+/**
+ * 값 편집 재렌더링
+ */
 function handleSetTable() {
   tempTableValues = [...values.get()];
   const ul = document.getElementById("ul");
@@ -193,6 +237,9 @@ function handleSetTable() {
   });
 }
 
+/**
+ * 값 추가 재렌더링
+ */
 function handleSetAddInput() {
   const idInput = document.getElementById("idInput");
   const valueInput = document.getElementById("valueInput");
@@ -204,6 +251,9 @@ function handleSetAddInput() {
   valueInputValue = "";
 }
 
+/**
+ * 값 고급 편집 재렌더링
+ */
 function handleSetAdvancedTextarea() {
   const textarea = document.getElementById("textarea");
 
@@ -258,4 +308,25 @@ function handleInitUl(ul) {
     </li>
     <div class="crossbar"></div>
   `;
+}
+
+/**
+ * 최대값 반환
+ * @returns {string | number}
+ */
+function handleGetMaxValueInArray() {
+  try {
+    const vals = values.get();
+
+    if (!Array.isArray(vals)) throw Error("배열이 아닙니다.");
+
+    if (vals.length < 1) return 100;
+
+    return vals.reduce((max, current) =>
+      max.value > current.value ? max : current
+    ).value;
+  } catch (err) {
+    console.error(err);
+    alert("올바른 값을 입력하시오.");
+  }
 }
