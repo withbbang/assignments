@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" type="text/css" href="./index.css" />
+    <script type="text/javascript" src="./main.js"></script>
+    <title>Assignment of 아이엠파인</title>
+  </head>
+  <body>
+    <div class="wrap">
+      <div class="div-section canvas-section">
+        <p>1. 그래프</p>
+        <canvas id="canvas"></canvas>
+      </div>
+      <div class="div-section table-section">
+        <p>2. 값 편집</p>
+        <ul id="ul" class="ul">
+          <li class="li li-header">
+            <div class="ul-id-div">ID</div>
+            &nbsp;
+            <div class="ul-value-div">값</div>
+            &nbsp;
+            <div class="ul-delete-div"></div>
+          </li>
+          <div class="crossbar"></div>
+        </ul>
+        <button class="button apply" onclick="handleApplyDeleteValue()">
+          Apply
+        </button>
+      </div>
+      <div class="div-section input-section">
+        <p>3. 값 추가</p>
+        <div class="add-div">
+          <input
+            class="id-input"
+            id="idInput"
+            oninput="handleOnInputId(this)"
+          />&nbsp;
+          <input
+            class="value-input"
+            id="valueInput"
+            oninput="handleOnInputValue(this)"
+          />&nbsp;
+          <button class="button add" onclick="handleAddValue()">Add</button>
+        </div>
+      </div>
+      <div class="div-section parse-section">
+        <p>4. 값 고급 편집</p>
+        <textarea
+          id="textarea"
+          oninput="handleOnInputTextarea(this)"
+        ></textarea>
+        <div class="crossbar"></div>
+        <button class="button apply" onclick="handleApplyAdvancedValue()">
+          Apply
+        </button>
+      </div>
+    </div>
+  </body>
+</html>

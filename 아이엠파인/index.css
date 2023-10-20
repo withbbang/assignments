@@ -1,0 +1,114 @@
+html,
+body {
+  margin: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.wrap {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.div-section {
+  width: 80%;
+  display: flex;
+  flex-direction: column;
+  margin: 20px 0;
+}
+
+.canvas-section {
+}
+
+.table-section {
+}
+.table-section .ul {
+  width: 100%;
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+.table-section .ul .li {
+  display: flex;
+  width: 100%;
+  color: #000;
+}
+.table-section .ul .li div {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.table-section .ul .li-header div {
+  background-color: #a5a5a5;
+  color: #fff !important;
+}
+.table-section .ul .li-even div {
+  background-color: #e1e1e1;
+}
+.table-section .ul .li-odd div {
+  background-color: #f0f0f0;
+}
+.table-section .ul .li .ul-id-div {
+  width: 20%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.table-section .ul .li .ul-value-div {
+  width: 60%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.table-section .ul .li .ul-delete-div {
+  width: 20%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.table-section .ul .li .ul-delete-div > button {
+  background-color: inherit;
+  border: none;
+  color: #f00;
+}
+
+.input-section {
+}
+.input-section .add-div {
+  width: 100%;
+  display: flex;
+}
+.input-section .add-div .id-input {
+  width: 15%;
+}
+.input-section .add-div .value-input {
+  width: 70%;
+}
+.input-section .add-div .add {
+  width: 15%;
+}
+
+.parse-section {
+}
+
+#canvas {
+  width: 100%;
+}
+
+p {
+  margin: 5px 0;
+}
+
+.apply {
+  padding: 10px;
+  width: fit-content;
+  align-self: end;
+}
+
+.crossbar {
+  background-color: #fff;
+  width: 100%;
+  height: 4px;
+}
