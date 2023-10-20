@@ -62,6 +62,12 @@ body {
   align-items: center;
   justify-content: center;
 }
+.table-section .ul .li .ul-value-div input {
+  box-sizing: border-box;
+  text-align: center;
+  background-color: inherit;
+  border: 0.1px solid #a5a5a5;
+}
 .table-section .ul .li .ul-delete-div {
   width: 15%;
   display: flex;

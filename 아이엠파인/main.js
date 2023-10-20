@@ -50,6 +50,15 @@ const values = (function () {
           alert("올바른 값을 입력하시오.");
         }
       },
+      // values 배열 중 일부 값 임시 갱신
+      update: function (id, value) {
+        if (handleValidCheckWithoutZero(id) && handleIdValidCheck(id)) {
+          const idx = tempTableValues.findIndex((value) => value.id === id);
+          if (idx > -1) tempTableValues[idx].value = value;
+        } else {
+          alert("올바른 값을 입력하시오.");
+        }
+      },
     };
   };
 })();
@@ -65,23 +74,26 @@ document.addEventListener("DOMContentLoaded", function () {
 // img, video 로드 후 실행할 로직
 window.onload = function () {};
 
+/******************************************************************************
+ *                                  콜백 함수                                   *
+ *****************************************************************************/
+/**
+ * 값 편집 - 값 blur 콜백 함수
+ * @param {HTMLElement} el
+ */
+function handleOnBlurValue(el) {
+  values().update(el.dataset.id, el.value);
+}
+
 /**
  * 값 편집 - 삭제 버튼 콜백 함수
  * @param {HTMLElement} el
  */
 function handleDeleteValue(el) {
-  const id = el.dataset.id;
-
-  values().delete(id);
-
-  const ul = document.getElementById("ul");
-
-  handleSetUl(ul, tempTableValues);
+  values().delete(el.dataset.id);
+  handleSetUl(document.getElementById("ul"), tempTableValues);
 }
 
-/******************************************************************************
- *                                  콜백 함수                                   *
- *****************************************************************************/
 /**
  * 값 편집 - Apply 버튼 콜백 함수
  */
@@ -146,8 +158,7 @@ function handleOnBlurTextarea(el) {
  */
 function handleApplyAdvancedValue() {
   try {
-    const newValues = JSON.parse(advancedText);
-    values().set([...newValues]);
+    values().set([...JSON.parse(advancedText)]);
     handleRender();
   } catch (err) {
     console.error(err);
@@ -216,20 +227,15 @@ function handleSetCanvas() {
 function handleSetTable() {
   const vals = values().get();
   tempTableValues = [...vals];
-  const ul = document.getElementById("ul");
-
-  handleSetUl(ul, vals);
+  handleSetUl(document.getElementById("ul"), vals);
 }
 
 /**
  * 값 추가 - 재렌더링
  */
 function handleSetAddInput() {
-  const idInput = document.getElementById("idInput");
-  const valueInput = document.getElementById("valueInput");
-
-  idInput.value = "";
-  valueInput.value = "";
+  document.getElementById("idInput").value = "";
+  document.getElementById("valueInput").value = "";
 
   idInputValue = "";
   valueInputValue = "";
@@ -239,9 +245,7 @@ function handleSetAddInput() {
  * 값 고급 편집 - 재렌더링
  */
 function handleSetAdvancedTextarea() {
-  const textarea = document.getElementById("textarea");
-
-  textarea.value = JSON.stringify(values().get());
+  document.getElementById("textarea").value = JSON.stringify(values().get());
 }
 
 /**
@@ -307,8 +311,12 @@ function handleSetUl(ul, values) {
       `
         <li class="li li-${idx % 2 === 0 ? "even" : "odd"}">
             <div class="ul-id-div">${id}</div>&nbsp;
-            <div class="ul-value-div">${value}</div>&nbsp;
-            <div class="ul-delete-div"><button data-id="${id}" onclick="handleDeleteValue(this)">삭제</button></div>
+            <div class="ul-value-div">
+              <input data-id="${id}" value="${value}" onblur="handleOnBlurValue(this);"/>
+            </div>&nbsp;
+            <div class="ul-delete-div">
+              <button data-id="${id}" onclick="handleDeleteValue(this)">삭제</button>
+            </div>
         </li>
         <div class="crossbar"></div>
       `
@@ -326,7 +334,7 @@ function handleGetMaxValueInArray() {
 
     if (!Array.isArray(vals)) throw Error("배열이 아닙니다.");
 
-    if (vals.length < 1) return 100;
+    if (vals.length < 1) return "∞";
 
     return Math.max(...vals.map((item) => item.value));
   } catch (err) {
