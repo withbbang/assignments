@@ -73,21 +73,7 @@ function handleDeleteValue(el) {
 
   const ul = document.getElementById("ul");
 
-  handleInitUl(ul);
-
-  tempTableValues.forEach(({ id, value }, idx) => {
-    ul.insertAdjacentHTML(
-      "beforeend",
-      `
-        <li class="li li-${idx % 2 === 0 ? "even" : "odd"}">
-            <div class="ul-id-div">${id}</div>&nbsp;
-            <div class="ul-value-div">${value}</div>&nbsp;
-            <div class="ul-delete-div"><button data-id="${id}" onclick="handleDeleteValue(this)">삭제</button></div>
-        </li>
-        <div class="crossbar"></div>
-      `
-    );
-  });
+  handleSetUl(ul, tempTableValues);
 }
 
 /**
@@ -175,10 +161,9 @@ function handleSetCanvas() {
   canvas.height = height;
   ctx.clearRect(0, 0, width, height);
   const vals = values.get();
-  const length = vals.length;
   const max = handleGetMaxValueInArray();
   const paddingDefault = 20;
-  const distance = ((width - paddingDefault * 2) * length) / (length + 1);
+  const distance = (width - paddingDefault * 2) / (vals.length + 1);
 
   // 그래프 기본 스타일 설정
   ctx.lineWidth = 1;
@@ -190,26 +175,27 @@ function handleSetCanvas() {
   ctx.moveTo(paddingDefault, height - paddingDefault);
   ctx.lineTo(width - paddingDefault, height - paddingDefault);
   ctx.stroke();
-  ctx.closePath();
+
   // Y축 그리기
   ctx.beginPath();
   ctx.moveTo(paddingDefault, height - paddingDefault);
   ctx.lineTo(paddingDefault, paddingDefault);
   ctx.stroke();
-  ctx.closePath();
 
-  // 최대값 설정
+  // 최대값 표시
   ctx.fillText(max, 0, paddingDefault);
 
   // 막대 그래프 그리기
-  ctx.strokeStyle = "#00f";
+  ctx.strokeStyle = "#f00";
   vals.forEach(({ id, value }, idx) => {
     ctx.fillText(id, paddingDefault + distance * (idx + 1), height);
     ctx.beginPath();
     ctx.moveTo(paddingDefault + distance * (idx + 1), height - paddingDefault);
-    ctx.lineTo(paddingDefault + distance * (idx + 1), paddingDefault);
+    ctx.lineTo(
+      paddingDefault + distance * (idx + 1),
+      paddingDefault + ((max - value) * (height - 2 * paddingDefault)) / max
+    );
     ctx.stroke();
-    ctx.closePath();
   });
 }
 
@@ -217,24 +203,11 @@ function handleSetCanvas() {
  * 값 편집 재렌더링
  */
 function handleSetTable() {
-  tempTableValues = [...values.get()];
+  const vals = values.get();
+  tempTableValues = [...vals];
   const ul = document.getElementById("ul");
 
-  handleInitUl(ul);
-
-  values.get().forEach(({ id, value }, idx) => {
-    ul.insertAdjacentHTML(
-      "beforeend",
-      `
-        <li class="li li-${idx % 2 === 0 ? "even" : "odd"}">
-            <div class="ul-id-div">${id}</div>&nbsp;
-            <div class="ul-value-div">${value}</div>&nbsp;
-            <div class="ul-delete-div"><button data-id="${id}" onclick="handleDeleteValue(this)">삭제</button></div>
-        </li>
-        <div class="crossbar"></div>
-      `
-    );
-  });
+  handleSetUl(ul, vals);
 }
 
 /**
@@ -296,8 +269,9 @@ function handleIdValidCheck(id) {
 /**
  * ul 초기화
  * @param {HTMLElement} ul
+ * @param {Array<Object>} values
  */
-function handleInitUl(ul) {
+function handleSetUl(ul, values) {
   ul.innerHTML = `
     <li class="li li-header">
         <div class="ul-id-div">ID</div>
@@ -308,6 +282,20 @@ function handleInitUl(ul) {
     </li>
     <div class="crossbar"></div>
   `;
+
+  values.forEach(({ id, value }, idx) => {
+    ul.insertAdjacentHTML(
+      "beforeend",
+      `
+        <li class="li li-${idx % 2 === 0 ? "even" : "odd"}">
+            <div class="ul-id-div">${id}</div>&nbsp;
+            <div class="ul-value-div">${value}</div>&nbsp;
+            <div class="ul-delete-div"><button data-id="${id}" onclick="handleDeleteValue(this)">삭제</button></div>
+        </li>
+        <div class="crossbar"></div>
+      `
+    );
+  });
 }
 
 /**
@@ -322,9 +310,7 @@ function handleGetMaxValueInArray() {
 
     if (vals.length < 1) return 100;
 
-    return vals.reduce((max, current) =>
-      max.value > current.value ? max : current
-    ).value;
+    return Math.max(...vals.map((item) => item.value));
   } catch (err) {
     console.error(err);
     alert("올바른 값을 입력하시오.");
