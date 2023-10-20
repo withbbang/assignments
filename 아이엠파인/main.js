@@ -174,52 +174,42 @@ function handleSetCanvas() {
   canvas.width = width;
   canvas.height = height;
   ctx.clearRect(0, 0, width, height);
-  const vals = [
-    { id: 0, value: 0 },
-    { id: 1, value: 1 },
-    { id: 2, value: 2 },
-    { id: 3, value: 3 },
-  ];
+  const vals = values.get();
   const length = vals.length;
-  const max = Math.max(...vals.map((item) => item.value));
+  const max = handleGetMaxValueInArray();
   const paddingDefault = 20;
-  const distance = (width - paddingDefault * (length + 1)) / length;
+  const distance = ((width - paddingDefault * 2) * length) / (length + 1);
 
   // 그래프 기본 스타일 설정
   ctx.lineWidth = 1;
   ctx.strokeStyle = "#000";
-  ctx.font = "15px Arial";
+  ctx.font = "15px";
 
   // X축 그리기
   ctx.beginPath();
-  ctx.moveTo(paddingDefault * (length + 1), height - paddingDefault);
-  ctx.lineTo(width - paddingDefault * (length + 1), height - paddingDefault);
+  ctx.moveTo(paddingDefault, height - paddingDefault);
+  ctx.lineTo(width - paddingDefault, height - paddingDefault);
   ctx.stroke();
-
+  ctx.closePath();
   // Y축 그리기
   ctx.beginPath();
-  ctx.moveTo(paddingDefault * (length + 1), height - paddingDefault);
-  ctx.lineTo(paddingDefault * (length + 1), paddingDefault);
+  ctx.moveTo(paddingDefault, height - paddingDefault);
+  ctx.lineTo(paddingDefault, paddingDefault);
   ctx.stroke();
+  ctx.closePath();
 
   // 최대값 설정
-  ctx.strokeText(max.toString(), paddingDefault / 2, paddingDefault);
+  ctx.fillText(max, 0, paddingDefault);
 
   // 막대 그래프 그리기
+  ctx.strokeStyle = "#00f";
   vals.forEach(({ id, value }, idx) => {
-    const barHeight = (value / max) * (height - paddingDefault * 2);
-    const barX = paddingDefault * (idx + 2) + distance * idx;
-    const barY = height - paddingDefault - barHeight;
-
-    ctx.strokeText(
-      id.toString(),
-      barX + distance / 4,
-      height - paddingDefault / 4
-    );
+    ctx.fillText(id, paddingDefault + distance * (idx + 1), height);
     ctx.beginPath();
-    ctx.rect(barX, barY, distance, barHeight);
-    ctx.fillStyle = "#00f";
-    ctx.fill();
+    ctx.moveTo(paddingDefault + distance * (idx + 1), height - paddingDefault);
+    ctx.lineTo(paddingDefault + distance * (idx + 1), paddingDefault);
+    ctx.stroke();
+    ctx.closePath();
   });
 }
 
