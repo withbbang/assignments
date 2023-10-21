@@ -30,8 +30,8 @@ const values = (function () {
       // values 배열 추가
       add: function ({ id, value }) {
         if (
-          handleValidCheckWithoutZero(id) &&
-          handleValidCheckWithoutZero(value) &&
+          handleCheckIsValidIdWithoutZero(id) &&
+          handleCheckIsValidValueWithoutZero(value) &&
           !handleIdValidCheck(id)
         ) {
           values.push({ id, value });
@@ -43,7 +43,7 @@ const values = (function () {
       },
       // values 배열 임시 삭제
       delete: function (id) {
-        if (handleValidCheckWithoutZero(id) && handleIdValidCheck(id)) {
+        if (handleCheckIsValidIdWithoutZero(id) && handleIdValidCheck(id)) {
           const idx = tempTableValues.findIndex((value) => value.id === id);
           if (idx > -1) tempTableValues.splice(idx, 1);
         } else {
@@ -52,7 +52,7 @@ const values = (function () {
       },
       // values 배열 중 일부 값 임시 갱신
       update: function (id, value) {
-        if (handleValidCheckWithoutZero(id) && handleIdValidCheck(id)) {
+        if (handleCheckIsValidIdWithoutZero(id) && handleIdValidCheck(id)) {
           const idx = tempTableValues.findIndex((value) => value.id === id);
           if (idx > -1) tempTableValues[idx].value = value;
         } else {
@@ -82,7 +82,19 @@ window.onload = function () {};
  * @param {HTMLElement} el
  */
 function handleOnBlurValue(el) {
-  values().update(el.dataset.id, el.value);
+  const {
+    value,
+    dataset: { id },
+  } = el;
+
+  if (
+    handleCheckIsValidIdWithoutZero(id) &&
+    handleCheckIsValidValueWithoutZero(value)
+  ) {
+    values().update(el.dataset.id, el.value);
+  } else {
+    alert("올바른 값을 입력하시오.");
+  }
 }
 
 /**
@@ -115,7 +127,7 @@ function handleOnInputId(el) {
  * @param {HTMLElement} el
  */
 function handleOnInputValue(el) {
-  valueInputValue = el.value;
+  valueInputValue = +el.value;
 }
 
 /**
@@ -123,8 +135,8 @@ function handleOnInputValue(el) {
  */
 function handleAddValue() {
   if (
-    handleValidCheckWithoutZero(idInputValue) &&
-    handleValidCheckWithoutZero(valueInputValue) &&
+    handleCheckIsValidIdWithoutZero(idInputValue) &&
+    handleCheckIsValidValueWithoutZero(valueInputValue) &&
     !handleIdValidCheck(idInputValue)
   ) {
     values().add({ id: idInputValue, value: valueInputValue });
@@ -158,7 +170,15 @@ function handleOnBlurTextarea(el) {
  */
 function handleApplyAdvancedValue() {
   try {
-    values().set([...JSON.parse(advancedText)]);
+    const vals = [...JSON.parse(advancedText)];
+
+    vals.forEach(({ value }) => {
+      console.log(value, typeof value, typeof +value, +value);
+      if (!handleCheckIsValidValueWithoutZero(value))
+        throw Error("맞지 않는 타입");
+    });
+
+    values().set(vals);
     handleRender();
   } catch (err) {
     console.error(err);
@@ -262,17 +282,26 @@ function handleRender() {
  *                                   부속함수                                   *
  *****************************************************************************/
 /**
- * 변수 유효성 검증 함수
- * @param {string | undefined | null} value
+ * ID 유효성 검증 함수
+ * @param {string | undefined | null} id
  * @returns {boolean}
  */
-function handleValidCheckWithoutZero(value) {
+function handleCheckIsValidIdWithoutZero(id) {
   return (
-    (typeof value === "string" || typeof value === "number") &&
-    value !== "" &&
-    value !== undefined &&
-    value !== null
+    (typeof id === "string" || typeof id === "number") &&
+    id !== "" &&
+    id !== undefined &&
+    id !== null
   );
+}
+
+/**
+ * value 유효성 검증 함수
+ * @param {number} value
+ * @returns {boolean}
+ */
+function handleCheckIsValidValueWithoutZero(value) {
+  return !isNaN(+value) && value !== undefined && value !== null;
 }
 
 /**
@@ -312,7 +341,7 @@ function handleSetUl(ul, values) {
         <li class="li li-${idx % 2 === 0 ? "even" : "odd"}">
             <div class="ul-id-div">${id}</div>&nbsp;
             <div class="ul-value-div">
-              <input data-id="${id}" value="${value}" onblur="handleOnBlurValue(this);"/>
+              <input data-id="${id}" value="${value}" type="number" onblur="handleOnBlurValue(this);"/>
             </div>&nbsp;
             <div class="ul-delete-div">
               <button data-id="${id}" onclick="handleDeleteValue(this)">삭제</button>
