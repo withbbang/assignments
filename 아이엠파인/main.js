@@ -29,34 +29,49 @@ const values = (function () {
       },
       // values 배열 추가
       add: function ({ id, value }) {
-        if (
-          handleCheckIsValidIdWithoutZero(id) &&
-          handleCheckIsValidValueWithoutZero(value) &&
-          !handleIdValidCheck(id)
-        ) {
-          values.push({ id, value });
-          tempTableValues = [...values];
-          return values;
-        } else {
-          alert("올바른 값을 입력하시오.");
+        try {
+          if (
+            handleCheckIsValidIdWithoutZero(id) &&
+            handleCheckIsValidValueWithoutZero(value) &&
+            handleIdValidCheck(id)
+          ) {
+            values.push({ id, value });
+            tempTableValues = [...values];
+            return values;
+          } else {
+            throw Error("올바른 값을 입력하시오");
+          }
+        } catch (err) {
+          console.error(err);
+          alert(err.message);
         }
       },
       // values 배열 임시 삭제
       delete: function (id) {
-        if (handleCheckIsValidIdWithoutZero(id) && handleIdValidCheck(id)) {
-          const idx = tempTableValues.findIndex((value) => value.id === id);
-          if (idx > -1) tempTableValues.splice(idx, 1);
-        } else {
-          alert("올바른 값을 입력하시오.");
+        try {
+          if (handleCheckIsValidIdWithoutZero(id)) {
+            const idx = tempTableValues.findIndex((value) => value.id === id);
+            if (idx > -1) tempTableValues.splice(idx, 1);
+          } else {
+            throw Error("올바른 값을 입력하시오");
+          }
+        } catch (err) {
+          console.error(err);
+          alert(err.message);
         }
       },
       // values 배열 중 일부 값 임시 갱신
       update: function (id, value) {
-        if (handleCheckIsValidIdWithoutZero(id) && handleIdValidCheck(id)) {
-          const idx = tempTableValues.findIndex((value) => value.id === id);
-          if (idx > -1) tempTableValues[idx].value = value;
-        } else {
-          alert("올바른 값을 입력하시오.");
+        try {
+          if (handleCheckIsValidIdWithoutZero(id)) {
+            const idx = tempTableValues.findIndex((value) => value.id === id);
+            if (idx > -1) tempTableValues[idx].value = value;
+          } else {
+            throw Error("올바른 값을 입력하시오");
+          }
+        } catch (err) {
+          console.error(err);
+          alert(err.message);
         }
       },
     };
@@ -87,14 +102,7 @@ function handleOnBlurValue(el) {
     dataset: { id },
   } = el;
 
-  if (
-    handleCheckIsValidIdWithoutZero(id) &&
-    handleCheckIsValidValueWithoutZero(value)
-  ) {
-    values().update(el.dataset.id, el.value);
-  } else {
-    alert("올바른 값을 입력하시오.");
-  }
+  values().update(id, value);
 }
 
 /**
@@ -134,16 +142,8 @@ function handleOnInputValue(el) {
  * 값 추가 - Add 버튼 콜백 함수
  */
 function handleAddValue() {
-  if (
-    handleCheckIsValidIdWithoutZero(idInputValue) &&
-    handleCheckIsValidValueWithoutZero(valueInputValue) &&
-    !handleIdValidCheck(idInputValue)
-  ) {
-    values().add({ id: idInputValue, value: valueInputValue });
-    handleRender();
-  } else {
-    alert("올바른 값을 입력하시오.");
-  }
+  values().add({ id: idInputValue, value: valueInputValue });
+  handleRender();
 }
 
 /**
@@ -173,16 +173,18 @@ function handleApplyAdvancedValue() {
     const vals = [...JSON.parse(advancedText)];
 
     vals.forEach(({ value }) => {
-      console.log(value, typeof value, typeof +value, +value);
-      if (!handleCheckIsValidValueWithoutZero(value))
-        throw Error("맞지 않는 타입");
+      handleCheckIsValidValueWithoutZero(value);
     });
 
     values().set(vals);
     handleRender();
   } catch (err) {
     console.error(err);
-    alert("올바른 값을 입력하시오.");
+    let message = "올바른 값을 입력하시오.";
+    if (err.name === "Error") {
+      message = err.message;
+    }
+    alert(message);
   }
 }
 
@@ -287,12 +289,14 @@ function handleRender() {
  * @returns {boolean}
  */
 function handleCheckIsValidIdWithoutZero(id) {
-  return (
+  if (
     (typeof id === "string" || typeof id === "number") &&
     id !== "" &&
     id !== undefined &&
     id !== null
-  );
+  )
+    return true;
+  else throw Error("올바른 ID를 입력하시오");
 }
 
 /**
@@ -301,7 +305,8 @@ function handleCheckIsValidIdWithoutZero(id) {
  * @returns {boolean}
  */
 function handleCheckIsValidValueWithoutZero(value) {
-  return !isNaN(+value) && value !== undefined && value !== null;
+  if (!isNaN(+value) && value !== undefined && value !== null) return true;
+  else throw Error(`숫자가 아닙니다 - ${value}`);
 }
 
 /**
@@ -310,11 +315,13 @@ function handleCheckIsValidValueWithoutZero(value) {
  * @returns {boolean}
  */
 function handleIdValidCheck(id) {
-  return (
+  if (
     typeof values()
       .get()
       .find((value) => value.id === id) === "object"
-  );
+  )
+    throw Error("ID가 중복되었습니다.");
+  else return true;
 }
 
 /**
@@ -368,6 +375,6 @@ function handleGetMaxValueInArray() {
     return Math.max(...vals.map((item) => item.value));
   } catch (err) {
     console.error(err);
-    alert("올바른 값을 입력하시오.");
+    alert("숫자가 아닌 값이 들어가 있습니다.");
   }
 }
