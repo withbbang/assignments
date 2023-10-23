@@ -12,6 +12,12 @@ body {
   align-items: center;
 }
 
+.info {
+  width: 80%;
+  display: flex;
+  justify-content: end;
+}
+
 .div-section {
   width: 80%;
   display: flex;
