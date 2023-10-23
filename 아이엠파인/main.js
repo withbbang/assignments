@@ -197,19 +197,19 @@ function handleApplyAdvancedValue() {
 function handleSetCanvas() {
   const canvas = document.querySelector(".canvas");
   const ctx = canvas.getContext("2d");
-  const { width, height } = canvas.getBoundingClientRect();
+  const { width, height } = canvas.getBoundingClientRect(); // 실제 렌더링된 canvas 크기 반환
   canvas.width = width;
   canvas.height = height;
-  ctx.clearRect(0, 0, width, height);
+  ctx.clearRect(0, 0, width, height); // canvas 지우기
   const vals = values().get();
   const max = handleGetMaxValueInArray();
   const paddingDefault = 20;
-  const distance = (width - paddingDefault * 2) / (vals.length + 1);
+  const distance = (width - paddingDefault * 2) / (vals.length + 1); // 막대 그래프간 간격
 
   // 그래프 기본 스타일 설정
   ctx.lineWidth = 1;
   ctx.strokeStyle = "#000";
-  ctx.font = "15px";
+  ctx.font = "15px Arial";
 
   // X축 그리기
   ctx.beginPath();
@@ -230,9 +230,10 @@ function handleSetCanvas() {
   ctx.fillText(max, 0, paddingDefault);
 
   // 막대 그래프 그리기
-  ctx.strokeStyle = "#f00";
+  ctx.font = "10px Arial";
   vals.forEach(({ id, value }, idx) => {
     ctx.fillText(id, paddingDefault + distance * (idx + 1), height - 10);
+    ctx.strokeStyle = handleGenerateRandomColorByHex();
     ctx.beginPath();
     ctx.moveTo(paddingDefault + distance * (idx + 1), height - paddingDefault);
     ctx.lineTo(
@@ -271,7 +272,7 @@ function handleSetAdvancedTextarea() {
 }
 
 /**
- * 화면 반영
+ * 화면 렌더링
  */
 function handleRender() {
   handleSetCanvas();
@@ -377,4 +378,12 @@ function handleGetMaxValueInArray() {
     console.error(err);
     alert("숫자가 아닌 값이 들어가 있습니다.");
   }
+}
+
+/**
+ * 16진수 임의 색 반환
+ * @returns {string}
+ */
+function handleGenerateRandomColorByHex() {
+  return "#" + Math.floor(Math.random() * 16777215).toString(16);
 }
